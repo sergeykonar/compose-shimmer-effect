@@ -1,0 +1,68 @@
+name: Build Android Library AAR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  build-aar:
+    runs-on: ubuntu-latest
+    env:
+      NASA_API_KEY: ${{  secrets.NASA_API_KEY }} # Inject NASA_API_KEY securely
+
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup JDK 17 (required for AGP 8.9.0)
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 3️⃣ Setup Gradle cache (for faster builds)
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION_MAJOR=$(grep major version.properties | cut -d'=' -f2)
+          VERSION_MINOR=$(grep minor version.properties | cut -d'=' -f2)
+          VERSION_PATCH=$(grep patch version.properties | cut -d'=' -f2)
+          VERSION_NAME="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create gradle.properties
+        run: |
+          cat <<EOF > gradle.properties
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          kotlin.code.style=official
+          android.nonTransitiveRClass=true
+          EOF
+
+      # 4️⃣ Build the AAR
+      - name: Build Release AAR
+        run: ./gradlew :compose:assembleRelease
+
+      # 5️⃣ Upload the generated AAR as an artifact
+      - name: Upload AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: compose-aar
+          path: compose/build/outputs/aar/*.aar
+
+       # 6️⃣ Create GitHub Release and upload the AAR
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: release
+          name: "Release v${{ steps.version.outputs.version_name }}"
+          files: compose/build/outputs/aar/*.aar
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
