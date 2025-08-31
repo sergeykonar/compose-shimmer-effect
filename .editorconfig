@@ -1,0 +1,11 @@
+[*.{kt,kts}]
+ktlint_code_style = ktlint_official
+ktlint_function_naming_ignore_when_annotated_with = Composable
+compose_allowed_composition_locals = LocalShimmerTheme
+ktlint_off=compose:modifier-composed-check
+
+[**/androidTest/**/*.kt]
+disabled_rules = compose:composable-annotation-naming
+
+[**/test/**/*.kt]
+disabled_rules = compose:composable-annotation-naming
