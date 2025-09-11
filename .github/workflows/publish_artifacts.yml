@@ -1,0 +1,40 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build Android Library AAR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  build-aar:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup JDK 11 (your version)
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+
+      # 3️⃣ Setup Gradle cache (for faster builds)
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      # 4️⃣ Build the AAR
+      - name: Build Release AAR
+        run: ./gradlew :your-library-module:assembleRelease
+
+      # 5️⃣ Upload as an artifact
+      - name: Upload AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: your-library-aar
+          path: your-library-module/build/outputs/aar/*.aar
