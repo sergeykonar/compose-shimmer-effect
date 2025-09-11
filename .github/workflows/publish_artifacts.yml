@@ -30,7 +30,7 @@ jobs:
 
       # 4️⃣ Build the AAR
       - name: Build Release AAR
-        run: ./gradlew :your-library-module:assembleRelease
+        run: ./gradlew :compose:assembleRelease
 
       # 5️⃣ Upload as an artifact
       - name: Upload AAR
