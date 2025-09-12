@@ -13,7 +13,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-        val nasaApiKey: String = project.property("NASA_API_KEY") as String
+        val nasaApiKey = System.getenv("NASA_API_KEY")
+            ?: findProperty("NASA_API_KEY")?.toString()
+            ?: throw GradleException("NASA_API_KEY is missing. Set it in gradle.properties or as an env variable")
+
         buildConfigField("String", "NASA_API_KEY", "\"$nasaApiKey\"")
     }
 
