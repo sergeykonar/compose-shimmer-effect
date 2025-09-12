@@ -47,3 +47,11 @@ jobs:
         with:
           name: compose-aar
           path: compose/build/outputs/aar/*.aar
+
+       # 6️⃣ Create GitHub Release and upload the AAR
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: compose/build/outputs/aar/*.aar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
