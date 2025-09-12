@@ -9,6 +9,8 @@ on:
 jobs:
   build-aar:
     runs-on: ubuntu-latest
+    env:
+      NASA_API_KEY: ${{ secrets.NASA_API_KEY }} # Inject NASA_API_KEY securely
 
     steps:
       # 1️⃣ Checkout the repository
@@ -30,9 +32,9 @@ jobs:
       - name: Build Release AAR
         run: ./gradlew :compose:assembleRelease
 
-      # 5️⃣ Upload as an artifact
+      # 5️⃣ Upload the generated AAR as an artifact
       - name: Upload AAR
         uses: actions/upload-artifact@v4
         with:
-          name: your-library-aar
+          name: compose-aar
           path: compose/build/outputs/aar/*.aar
