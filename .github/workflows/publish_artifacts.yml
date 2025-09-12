@@ -1,0 +1,40 @@
+name: Build Android Library AAR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  build-aar:
+    runs-on: ubuntu-latest
+    env:
+      NASA_API_KEY: ${{  secrets.NASA_API_KEY }} # Inject NASA_API_KEY securely
+
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup JDK 17 (required for AGP 8.9.0)
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 3️⃣ Setup Gradle cache (for faster builds)
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      # 4️⃣ Build the AAR
+      - name: Build Release AAR
+        run: ./gradlew :compose:assembleRelease
+
+      # 5️⃣ Upload the generated AAR as an artifact
+      - name: Upload AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: compose-aar
+          path: compose/build/outputs/aar/*.aar
