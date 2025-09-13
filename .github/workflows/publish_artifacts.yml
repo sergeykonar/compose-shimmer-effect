@@ -56,6 +56,4 @@ jobs:
           name: "Release Build ${{ github.run_number }}"
           files: compose/build/outputs/aar/*.aar
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
