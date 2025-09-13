@@ -28,12 +28,17 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Read version
+      - name: Read version.properties
         id: version
         run: |
-          VERSION_MAJOR=$(grep major version.properties | cut -d'=' -f2)
-          VERSION_MINOR=$(grep minor version.properties | cut -d'=' -f2)
-          VERSION_PATCH=$(grep patch version.properties | cut -d'=' -f2)
+          VERSION_FILE="compose/version.properties"
+          if [ ! -f "$VERSION_FILE" ]; then
+            echo "❌ $VERSION_FILE not found!"
+            exit 1
+          fi
+          VERSION_MAJOR=$(grep major "$VERSION_FILE" | cut -d'=' -f2)
+          VERSION_MINOR=$(grep minor "$VERSION_FILE" | cut -d'=' -f2)
+          VERSION_PATCH=$(grep patch "$VERSION_FILE" | cut -d'=' -f2)
           VERSION_NAME="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
 
