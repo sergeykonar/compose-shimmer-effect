@@ -31,7 +31,7 @@ jobs:
       - name: Read version.properties
         id: version
         run: |
-          VERSION_FILE="compose/version.properties"
+          VERSION_FILE="../../compose/version.properties"
           if [ ! -f "$VERSION_FILE" ]; then
             echo "❌ $VERSION_FILE not found!"
             exit 1
@@ -40,6 +40,7 @@ jobs:
           VERSION_MINOR=$(grep minor "$VERSION_FILE" | cut -d'=' -f2)
           VERSION_PATCH=$(grep patch "$VERSION_FILE" | cut -d'=' -f2)
           VERSION_NAME="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
+          echo "✅ Version detected: $VERSION_NAME"
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
 
       - name: Create gradle.properties
