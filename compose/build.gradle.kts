@@ -46,7 +46,7 @@ android {
         buildConfigField(
             "String",
             "LIBRARY_VERSION",
-            versionNameGenerated
+            "\"$versionNameGenerated\""
         )
     }
 
