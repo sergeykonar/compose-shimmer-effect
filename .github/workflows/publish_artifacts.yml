@@ -36,9 +36,9 @@ jobs:
             echo "❌ $VERSION_FILE not found!"
             exit 1
           fi
-          VERSION_MAJOR=$(grep major "$VERSION_FILE" | cut -d'=' -f2)
-          VERSION_MINOR=$(grep minor "$VERSION_FILE" | cut -d'=' -f2)
-          VERSION_PATCH=$(grep patch "$VERSION_FILE" | cut -d'=' -f2)
+          VERSION_MAJOR=$(grep VERSION_MAJOR "$VERSION_FILE" | cut -d'=' -f2)
+          VERSION_MINOR=$(grep VERSION_MINOR "$VERSION_FILE" | cut -d'=' -f2)
+          VERSION_PATCH=$(grep VERSION_PATCH "$VERSION_FILE" | cut -d'=' -f2)
           VERSION_NAME="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
           echo "✅ Version detected: $VERSION_NAME"
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
@@ -63,7 +63,7 @@ jobs:
           name: compose-aar
           path: compose/build/outputs/aar/*.aar
 
-       # 6️⃣ Create GitHub Release and upload the AAR
+      # 6️⃣ Create GitHub Release and upload the AAR
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
