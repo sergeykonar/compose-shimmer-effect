@@ -1,7 +1,7 @@
 package konar.ui.compose.repository
 
+import dev.skonar.BuildConfig
 import konar.ui.compose.data.RoverPhotosResponse
-import konar.ui.view.BuildConfig
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

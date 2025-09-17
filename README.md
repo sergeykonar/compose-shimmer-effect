@@ -2,6 +2,13 @@
 
 This library provides a set of Jetpack Compose components that display a shimmer effect while content is loading. These components are designed to be easy to use and customize.
 
+## Import library
+
+To use the library, add the following dependency:
+```
+implementation("dev.skonar:shimmer-compose:0.1.0")
+```
+
 ## Components
 
 The library includes the following main components:
