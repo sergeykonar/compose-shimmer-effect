@@ -1,8 +1,11 @@
 package konar.ui.view.extensions
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -13,8 +16,8 @@ import androidx.compose.ui.unit.IntSize
 import konar.ui.view.theme.LocalShimmerTheme
 import konar.ui.view.theme.ShimmerTheme
 
-@Suppress("ktlint")
 @Composable
+@Suppress("ktlint")
 fun Modifier.shimmerEffect(
     shimmer: Boolean = true,
     theme: ShimmerTheme = LocalShimmerTheme.current,
@@ -34,6 +37,7 @@ private data class ShimmerElement(
         node.shimmer = shimmer
         node.progress = progress
         node.theme = theme
+        node.invalidateCacheIfNeeded()
     }
 }
 
@@ -46,21 +50,49 @@ private class ShimmerNode(
     GlobalPositionAwareModifierNode {
     private var size: IntSize = IntSize.Zero
 
+    private var cachedBrush: Brush? = null
+    private var lastProgress: Float = Float.NaN
+    private var lastSize: IntSize = IntSize.Zero
+    private var lastTheme: ShimmerTheme? = null
+
     override fun ContentDrawScope.draw() {
         drawContent()
 
-        if (!shimmer || size.width == 0f || size.height == 0f) {
-            drawRect(Color.Transparent)
-            return
-        }
+        if (!shimmer || size.width == 0f || size.height == 0f) return
 
-        val intSize = IntSize(size.width.toInt(), size.height.toInt())
-        val brush = theme.effect.brush(progress, intSize, theme)
-        drawRect(brush)
+        getOrCreateBrush()
+        cachedBrush?.let {
+            drawRect(it)
+        } ?: run {
+            Log.e(TAG, "Brush is null")
+        }
+    }
+
+    private fun getOrCreateBrush(): Brush =
+        cachedBrush
+            .takeIf { lastProgress == progress && lastSize == size && lastTheme == theme }
+            ?: theme.effect.brush(progress, size, theme).also {
+                cachedBrush = it
+                lastProgress = progress
+                lastSize = size
+                lastTheme = theme
+            }
+
+    fun invalidateCacheIfNeeded() {
+        if (lastTheme != theme) {
+            cachedBrush = null
+        }
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
-        size = coordinates.size
+        if (size != coordinates.size) {
+            size = coordinates.size
+            cachedBrush = null
+        }
+    }
+
+    private companion object {
+        val TAG = ShimmerNode::class.simpleName
     }
 }
 

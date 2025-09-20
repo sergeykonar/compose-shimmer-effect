@@ -215,7 +215,11 @@ private fun PhotoItem(
             enableDiskCache = false,
             imageSize = DpSize(screenWidth, screenWidth),
         ) {
-            if (it is State.Success) isShimmering = false
+            if (it is State.Success) {
+                isShimmering = false
+            } else if (it is State.Error) {
+                isShimmering = false
+            }
         }
     }
 }
