@@ -21,15 +21,18 @@ class LinearShimmerEffect(
     private val direction: ShimmerDirection = ShimmerDirection.FromTopLeftToBottomRight,
     private val shimmerWidth: Float = SHIMMER_WIDTH,
 ) : ShimmerEffect {
-    private val tilt: Float
-        get() =
+    private val angleRad =
+        Math.toRadians(
             when (direction) {
                 ShimmerDirection.FromTopLeftToBottomRight -> DIAGONAL_45
                 ShimmerDirection.FromTopRightToBottomLeft -> DIAGONAL_135
                 ShimmerDirection.FromBottomLeftToTopRight -> DIAGONAL_NEGATIVE_45
                 ShimmerDirection.FromBottomRightToTopLeft -> DIAGONAL_NEGATIVE_135
-                is ShimmerDirection.Angle -> direction.degrees
-            }
+                is ShimmerDirection.Angle -> direction.degrees.toDouble()
+            },
+        )
+    private val ndx = cos(angleRad).toFloat()
+    private val ndy = sin(angleRad).toFloat()
 
     override fun brush(
         progress: Float,
@@ -39,32 +42,23 @@ class LinearShimmerEffect(
         val width = size.width.toFloat().coerceAtLeast(1f)
         val height = size.height.toFloat().coerceAtLeast(1f)
 
-        val angleRad = Math.toRadians(tilt.toDouble())
-        val dx = cos(angleRad).toFloat()
-        val dy = sin(angleRad).toFloat()
-
-        val length = hypot(dx, dy)
-        val ndx = dx / length
-        val ndy = dy / length
-
         val travelDistance = hypot(width, height) + shimmerWidth * 2
         val offset = -shimmerWidth + travelDistance * progress
 
-        val startX = width / 2f - (travelDistance / 2f) * ndx + offset * ndx
-        val startY = height / 2f - (travelDistance / 2f) * ndy + offset * ndy
-
-        val start = Offset(startX, startY)
+        val start =
+            Offset(
+                x = width / 2f - (travelDistance / 2f) * ndx + offset * ndx,
+                y = height / 2f - (travelDistance / 2f) * ndy + offset * ndy,
+            )
         val end = Offset(start.x + shimmerWidth * ndx, start.y + shimmerWidth * ndy)
 
-        val colorStops =
-            listOf(
-                theme.baseColor.copy(alpha = theme.opacity),
-                theme.highlightColor,
-                theme.baseColor.copy(alpha = theme.opacity),
-            )
-
         return Brush.linearGradient(
-            colors = colorStops,
+            colors =
+                listOf(
+                    theme.baseColor.copy(alpha = theme.opacity),
+                    theme.highlightColor,
+                    theme.baseColor.copy(alpha = theme.opacity),
+                ),
             start = start,
             end = end,
         )
@@ -73,9 +67,9 @@ class LinearShimmerEffect(
     private companion object {
         private const val SHIMMER_WIDTH = 200f
 
-        private const val DIAGONAL_45 = 45f
-        private const val DIAGONAL_135 = 135f
-        private const val DIAGONAL_NEGATIVE_45 = -45f
-        private const val DIAGONAL_NEGATIVE_135 = -135f
+        private const val DIAGONAL_45 = 45.0
+        private const val DIAGONAL_135 = 135.0
+        private const val DIAGONAL_NEGATIVE_45 = -45.0
+        private const val DIAGONAL_NEGATIVE_135 = -135.0
     }
 }

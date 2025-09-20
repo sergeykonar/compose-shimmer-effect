@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -15,7 +17,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import coil.request.CachePolicy
@@ -23,6 +24,7 @@ import coil.request.ImageRequest
 import konar.ui.view.extensions.shimmerEffect
 import konar.ui.view.extensions.shimmerOrBackground
 import konar.ui.view.state.State
+import konar.ui.view.state.toDomainSate
 import konar.ui.view.ui.DefaultImageShimmerValues.BackgroundColor
 
 /**
@@ -79,7 +81,7 @@ fun ImageShimmer(
  */
 @Composable
 fun ImageShimmerNetwork(
-    url: String,
+    url: String?,
     imageSize: DpSize,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
@@ -108,33 +110,20 @@ fun ImageShimmerNetwork(
         contentScale = contentScale,
     ) {
         val coilState = painter.state
-
-        val mappedState: State =
-            when (coilState) {
-                is AsyncImagePainter.State.Empty -> State.Empty
-                is AsyncImagePainter.State.Loading -> State.Loading(coilState.painter)
-                is AsyncImagePainter.State.Success ->
-                    State.Success(
-                        coilState.painter,
-                        coilState.result,
-                    )
-                is AsyncImagePainter.State.Error ->
-                    State.Error(
-                        coilState.painter,
-                        coilState.result,
-                    )
-            }
+        val mappedState: State = coilState.toDomainSate()
 
         onStateChange?.invoke(mappedState)
 
-        when (coilState) {
-            is AsyncImagePainter.State.Success -> {
+        when (mappedState) {
+            is State.Success -> {
+                Log.d(TAG, "Success loading image: $url")
                 SubcomposeAsyncImageContent(modifier = Modifier)
             }
-            is AsyncImagePainter.State.Error -> {
-                Log.e("ImageShimmerNetwork", "Error loading image: ${coilState.result.throwable}")
+            is State.Error -> {
+                Log.e(TAG, "Error loading image: ${mappedState.result.throwable}")
             }
-            else -> {
+            is State.Empty, is State.Loading -> {
+                Log.d(TAG, "State: $mappedState Loading image: $url")
                 Box(
                     modifier =
                         Modifier
@@ -145,6 +134,8 @@ fun ImageShimmerNetwork(
         }
     }
 }
+
+private const val TAG = "ImageShimmerNetwork"
 
 internal object DefaultImageShimmerValues {
     val BackgroundColor: Color = Color.Transparent

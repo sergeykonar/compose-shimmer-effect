@@ -55,7 +55,10 @@ fun ExampleAppTheme(
 
     val shimmerTheme =
         ShimmerTheme(
-            effect = LinearShimmerEffect(),
+            effect =
+                LinearShimmerEffect(
+                    shimmerWidth = 800f,
+                ),
             baseColor = colorScheme.surface,
             highlightColor = colorScheme.surfaceVariant,
             opacity = 1f,
