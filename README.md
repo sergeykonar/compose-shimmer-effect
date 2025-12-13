@@ -6,7 +6,7 @@ This library provides a set of Jetpack Compose components that display a shimmer
 
 To use the library, add the following dependency:
 ```
-implementation("dev.skonar:shimmer-compose:0.1.1")
+implementation("dev.skonar:shimmer-compose:0.1.2")
 ```
 
 ## Components

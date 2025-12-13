@@ -138,7 +138,7 @@ mavenPublishing {
     signAllPublications()
 }
 
-val updateReadmeVersion by tasks.registering {
+tasks.register("updateReadmeVersion") {
     val versionRegex = """implementation\("dev.skonar:shimmer-compose:.*"\)""".toRegex()
     val readmeFile = file("$rootDir/README.md")
 
