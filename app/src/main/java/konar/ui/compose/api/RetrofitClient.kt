@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     private const val TIMEOUT = 30L
-    private const val BASE_URL = "https://api.nasa.gov/mars-photos/api/v1/"
+    private const val BASE_URL = "https://picsum.photos/"
     private val okHttpClient =
         OkHttpClient
             .Builder()
