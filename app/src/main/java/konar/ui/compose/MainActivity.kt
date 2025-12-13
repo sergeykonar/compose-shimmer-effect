@@ -49,8 +49,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import konar.ui.compose.api.RetrofitClient
-import konar.ui.compose.data.RoverPhoto
-import konar.ui.compose.repository.MartianPhotosApi
+import konar.ui.compose.data.Photo
+import konar.ui.compose.repository.PhotosApi
 import konar.ui.compose.ui.theme.ExampleAppTheme
 import konar.ui.compose.viewmodel.MainViewModel
 import konar.ui.compose.viewmodel.MainViewModelFactory
@@ -69,7 +69,7 @@ const val TEXT_WIDTH_FRACTION = 0.75f
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels {
-        MainViewModelFactory(RetrofitClient.instance.create(MartianPhotosApi::class.java))
+        MainViewModelFactory(RetrofitClient.instance.create(PhotosApi::class.java))
     }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -89,17 +89,17 @@ class MainActivity : ComponentActivity() {
 private fun MainScreen(viewModel: MainViewModel) {
     val photos by viewModel.photos.collectAsState()
     val error by viewModel.error.collectAsState()
-    val currentSol by viewModel.currentSol.collectAsState()
+    val currentPage by viewModel.currentPage.collectAsState()
 
     var showContent1 by remember { mutableStateOf(true) }
     var showContent2 by remember { mutableStateOf(false) }
 
-    fun onPrevSol() = viewModel.decrementSol()
+    fun pnPrevPage() = viewModel.decrementPage()
 
-    fun onNextSol() = viewModel.incrementSol()
+    fun onNextPage() = viewModel.incrementPage()
 
     fun fetchPhotosIfEmpty() {
-        if (photos.isEmpty()) viewModel.fetchPhotosBySol(currentSol)
+        if (photos.isEmpty()) viewModel.fetchPhotosByPage(currentPage)
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
@@ -120,10 +120,10 @@ private fun MainScreen(viewModel: MainViewModel) {
                 PhotosContentState(
                     photos = photos,
                     error = error,
-                    currentSol = currentSol,
+                    currentPage = currentPage,
                     screenWidth = LocalConfiguration.current.screenWidthDp.dp,
-                    onPrev = ::onPrevSol,
-                    onNext = ::onNextSol,
+                    onPrev = ::pnPrevPage,
+                    onNext = ::onNextPage,
                     fetchIfEmpty = ::fetchPhotosIfEmpty,
                 )
             }
@@ -137,9 +137,9 @@ private fun MainScreen(viewModel: MainViewModel) {
 
 @Composable
 private fun PhotosContentState(
-    photos: List<RoverPhoto>,
+    photos: List<Photo>,
     error: String?,
-    currentSol: Int,
+    currentPage: Int,
     screenWidth: Dp,
     onPrev: () -> Unit,
     onNext: () -> Unit,
@@ -152,7 +152,7 @@ private fun PhotosContentState(
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        SolNavigation(currentSol, onPrev, onNext)
+        PageNavigation(currentPage, onPrev, onNext)
 
         if (error != null) {
             Text("Error: $error", modifier = Modifier.padding(16.dp))
@@ -178,8 +178,8 @@ private fun ToggleButtons(onToggle: (Boolean, Boolean) -> Unit) {
 }
 
 @Composable
-private fun SolNavigation(
-    currentSol: Int,
+private fun PageNavigation(
+    currentPage: Int,
     onPrev: () -> Unit,
     onNext: () -> Unit,
 ) {
@@ -187,23 +187,23 @@ private fun SolNavigation(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(bottom = 16.dp),
     ) {
-        Button(onClick = onPrev) { Text("Prev Sol") }
-        Button(onClick = onNext) { Text("Next Sol") }
+        Button(onClick = onPrev) { Text("Previous Page") }
+        Button(onClick = onNext) { Text("Next Page") }
         Spacer(modifier = Modifier.width(16.dp))
-        Text("Current Sol: $currentSol", modifier = Modifier.align(Alignment.CenterVertically))
+        Text("Current Page: $currentPage", modifier = Modifier.align(Alignment.CenterVertically))
     }
 }
 
 @Composable
 private fun PhotoItem(
-    photo: RoverPhoto,
+    photo: Photo,
     screenWidth: Dp,
 ) {
     var isShimmering by remember(photo.id) { mutableStateOf(true) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         TextShimmer(
-            "Rover: ${photo.rover.name}, Camera: ${photo.camera.name}",
+            "Author: ${photo.author}",
             isShimmering = isShimmering,
             modifier = Modifier.fillMaxWidth(TEXT_WIDTH_FRACTION),
         )
@@ -211,7 +211,7 @@ private fun PhotoItem(
         Spacer(modifier = Modifier.height(4.dp))
 
         ImageShimmerNetwork(
-            url = photo.imgSrc,
+            url = photo.downloadUrl,
             enableDiskCache = false,
             imageSize = DpSize(screenWidth, screenWidth),
         ) {

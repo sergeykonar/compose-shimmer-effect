@@ -40,11 +40,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-        val nasaApiKey = System.getenv("NASA_API_KEY")
-            ?: findProperty("NASA_API_KEY")?.toString()
-            ?: throw GradleException("NASA_API_KEY is missing. Set it in gradle.properties or as an env variable")
 
-        buildConfigField("String", "NASA_API_KEY", "\"$nasaApiKey\"")
         buildConfigField(
             "String",
             "LIBRARY_VERSION",
@@ -142,7 +138,7 @@ mavenPublishing {
     signAllPublications()
 }
 
-val updateReadmeVersion by tasks.registering {
+tasks.register("updateReadmeVersion") {
     val versionRegex = """implementation\("dev.skonar:shimmer-compose:.*"\)""".toRegex()
     val readmeFile = file("$rootDir/README.md")
 

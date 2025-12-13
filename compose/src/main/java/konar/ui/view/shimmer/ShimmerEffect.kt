@@ -33,7 +33,7 @@ interface ShimmerEffect {
 }
 
 @Composable
-fun shimmerProgress(
+internal fun shimmerProgress(
     durationMillis: Int,
     start: Float = 0f,
     end: Float = 1f,

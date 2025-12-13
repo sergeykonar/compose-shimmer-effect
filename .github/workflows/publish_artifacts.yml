@@ -9,8 +9,6 @@ on:
 jobs:
   build-aar:
     runs-on: ubuntu-latest
-    env:
-      NASA_API_KEY: ${{  secrets.NASA_API_KEY }} # Inject NASA_API_KEY securely
 
     steps:
       # 1️⃣ Checkout the repository
