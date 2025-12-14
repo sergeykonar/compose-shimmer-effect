@@ -1,0 +1,51 @@
+name: PR Quality Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup JDK 17 (AGP 8.9.0 compatible)
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 3️⃣ Setup Gradle cache
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      # 4️⃣ Create gradle.properties
+      - name: Create gradle.properties
+        run: |
+          cat <<EOF > gradle.properties
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          kotlin.code.style=official
+          android.nonTransitiveRClass=true
+          EOF
+
+      # 5️⃣ Run ktlint formatting
+      - name: Run ktlintFormat
+        run: ./gradlew ktlintFormat
+
+      # 6️⃣ Run Detekt
+      - name: Run detekt
+        run: ./gradlew detekt
+
+      # 7️⃣ Compile / build to catch syntax & type errors
+      - name: Build (compile check)
+        run: ./gradlew :app:assembleRelease
+
+      - name: Build (compile check)
+        run: ./gradlew :compose:assembleRelease
