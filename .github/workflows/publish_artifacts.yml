@@ -3,7 +3,7 @@ name: Build Android Library AAR
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch: # allow manual trigger
 
 jobs:
