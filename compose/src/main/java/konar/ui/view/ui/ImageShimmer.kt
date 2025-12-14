@@ -6,8 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -109,21 +108,28 @@ fun ImageShimmerNetwork(
                 .clip(shimmerShape),
         contentScale = contentScale,
     ) {
-        val coilState = painter.state
-        val mappedState: State = coilState.toDomainSate()
+        val mappedState: State = painter.state.toDomainSate()
 
-        onStateChange?.invoke(mappedState)
+        LaunchedEffect(mappedState) {
+            onStateChange?.invoke(mappedState)
+            when (mappedState) {
+                is State.Success -> {
+                    Log.d(TAG, "Success loading image: $url")
+                }
+                is State.Error -> {
+                    Log.e(TAG, "Error loading image: ${mappedState.result.throwable}")
+                }
+                is State.Empty, is State.Loading -> {
+                    Log.d(TAG, "State: $mappedState Loading image: $url")
+                }
+            }
+        }
 
         when (mappedState) {
             is State.Success -> {
-                Log.d(TAG, "Success loading image: $url")
                 SubcomposeAsyncImageContent(modifier = Modifier)
             }
-            is State.Error -> {
-                Log.e(TAG, "Error loading image: ${mappedState.result.throwable}")
-            }
-            is State.Empty, is State.Loading -> {
-                Log.d(TAG, "State: $mappedState Loading image: $url")
+            is State.Empty, is State.Loading, is State.Error -> {
                 Box(
                     modifier =
                         Modifier
